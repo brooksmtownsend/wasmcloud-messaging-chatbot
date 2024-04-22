@@ -1,0 +1,39 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: bad-janet
+  annotations:
+    version: v0.0.4
+    description: "Bad Janet Discord bot"
+spec:
+  components:
+    - name: janet
+      type: component
+      properties:
+        image: file://./build/bad_janet_s.wasm
+      traits:
+        # Govern the spread/scheduling of the component
+        - type: spreadscaler
+          properties:
+            replicas: 1
+        - type: link
+          properties:
+            target: discord
+            namespace: wasmcloud
+            package: messaging
+            interfaces: [consumer]
+
+    # Add a capability provider that implements `wasmcloud:messaging` using the Discord API
+    - name: discord
+      type: capability
+      properties:
+        image: file://../build/provider-messaging-discord.par.gz
+      traits:
+        - type: link
+          properties:
+            target: janet
+            namespace: wasmcloud
+            package: messaging
+            interfaces: [handler]
+            source_config:
+              - name: janet-bot-token

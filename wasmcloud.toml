@@ -1,0 +1,6 @@
+name = "Messaging Discord"
+language = "rust"
+type = "provider"
+
+[provider]
+vendor = "Brooks Townsend"
