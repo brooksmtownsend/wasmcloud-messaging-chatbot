@@ -1,0 +1,47 @@
+name: Rust CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project:
+          - name: discord
+            project-dir: ./
+            artifact: provider-messaging-discord.par.gz
+            subject-key: DISCORD_SUBJECT_KEY
+          - name: bad-janet
+            project-dir: ./bad-janet
+            artifact: bad_janet_s.wasm
+            subject-key: BAD_JANET_SUBJECT_KEY
+          - name: good-janet
+            project-dir: ./good-janet
+            artifact: good_janet_s.wasm
+            subject-key: GOOD_JANET_SUBJECT_KEY
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: wasmCloud/common-actions/install-wash@main
+      - name: Install wasm32-wasi
+        run: rustup toolchain add wasm32-wasi
+      - name: Build and Push
+        env:
+          WASH_ISSUER_KEY: ${{ secrets.WASH_ISSUER_KEY }}
+          WASH_REG_USER: brooksmtownsend
+          WASH_REG_PASSWORD: ${{ github.token }}
+        run: |
+          cd ${{ matrix.project.project-dir }}
+          export WASH_SUBJECT_KEY=${{ secrets[matrix.project.subject-key] }}
+          wash build
+          wash push github.com/brooksmtownsend/${{ matrix.project.name }}:canary ./build/${{ matrix.project.artifact }}
