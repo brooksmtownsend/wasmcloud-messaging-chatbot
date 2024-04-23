@@ -46,7 +46,7 @@ impl Provider for DiscordProvider {
             );
 
         if let Some(token) = source_config.get("token") {
-            let handler = DiscordHandler::new(&config.target_id);
+            let handler = DiscordHandler::new(config.target_id);
             let mut client =
                 serenity::Client::builder(token, serenity::all::GatewayIntents::non_privileged())
                     .event_handler(handler.clone())
