@@ -1,7 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
 use anyhow::Context as _;
-use futures::Future;
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 
@@ -71,7 +70,9 @@ impl Provider for DiscordProvider {
 
             Ok(())
         } else {
-            Err(anyhow::anyhow!("token is required"))
+            Err(anyhow::anyhow!(
+                "token is required for discord authentication"
+            ))
         }
     }
 
@@ -81,17 +82,13 @@ impl Provider for DiscordProvider {
 
         Ok(())
     }
-
-    fn shutdown(&self) -> impl Future<Output = Result<(), anyhow::Error>> + Send {
-        async { Ok(()) }
-    }
 }
 
 impl exports::wasmcloud::messaging::consumer::Handler<Option<Context>> for DiscordProvider {
     async fn request(
         &self,
-        _: std::option::Option<wasmcloud_provider_sdk::Context>,
-        _: std::string::String,
+        _: Option<Context>,
+        _: String,
         _: Vec<u8>,
         _: u32,
     ) -> Result<Result<types::BrokerMessage, String>, anyhow::Error> {
@@ -101,7 +98,7 @@ impl exports::wasmcloud::messaging::consumer::Handler<Option<Context>> for Disco
 
     async fn publish(
         &self,
-        ctx: std::option::Option<wasmcloud_provider_sdk::Context>,
+        ctx: Option<Context>,
         msg: types::BrokerMessage,
     ) -> Result<Result<(), String>, anyhow::Error> {
         debug!("component publishing message as bot");
