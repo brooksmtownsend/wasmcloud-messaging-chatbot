@@ -47,4 +47,4 @@ jobs:
           WASH_REG_USER: brooksmtownsend
           WASH_REG_PASSWORD: ${{ github.token }}
         run: |
-          wash push ghcr.io/brooksmtownsend/${{ matrix.project.name }}:canary ./build/${{ matrix.project.artifact }}
+          wash push ghcr.io/brooksmtownsend/${{ matrix.project.name }}:canary ${{ matrix.project.project-dir }}/build/${{ matrix.project.artifact }}
